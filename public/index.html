@@ -1,328 +1,333 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Discover what's filling up your JSON" />
+    <meta name="author" content="James Vaughan" />
 
-  <meta name="description" content="Discover what's filling up your JSON" />
-  <meta name="author" content="James Vaughan" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
 
-  <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>JSON Size Analyzer</title>
 
-  <title>JSON Size Analyzer</title>
-
-  <style>
-    @font-face {
-      font-family: "BerkeleyMono";
-      src: url("fonts/BerkeleyMono-Bold.woff2") format("woff2"),
-        url("fonts/BerkeleyMono-Bold.woff") format("woff");
-      font-weight: bold;
-      font-style: normal;
-    }
-
-    @font-face {
-      font-family: "BerkeleyMono";
-      src: url("fonts/BerkeleyMono-Regular.woff2") format("woff2"),
-        url("fonts/BerkeleyMono-Regular.woff") format("woff");
-      font-weight: normal;
-      font-style: normal;
-    }
-
-    :root {
-      /* Colors from Flexoki: https://stephango.com/flexoki */
-      --text-normal: #100f0f;
-      --text-muted: #6f6e69;
-      --text-faint: #b7b5ac;
-
-      --interface-normal: #e6e4d9;
-      --interface-hover: #dad8ce;
-      --interface-active: #cecdc3;
-
-      --background-primary: #fffcf0;
-      --background-secondary: #f2f0e5;
-
-      --red: #af3029;
-      --orange: #bc5215;
-      --yellow: #ad8301;
-      --green: #66800b;
-      --cyan: #24837b;
-      --blue: #205ea6;
-      --purple: #5e409d;
-      --magenta: #a02f6f;
-
-      --link-color: var(--orange);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --text-normal: #cecdc3;
-        --text-muted: #878580;
-        --text-faint: #575653;
-
-        --interface-normal: #282726;
-        --interface-hover: #343331;
-        --interface-active: #403e3c;
-
-        --background-primary: #100f0f;
-        --background-secondary: #1c1b1a;
-
-        --red: #d14d41;
-        --orange: #da702c;
-        --yellow: #d0a215;
-        --green: #879a39;
-        --cyan: #3aa99f;
-        --blue: #4385be;
-        --purple: #8b7ec8;
-        --magenta: #ce5d97;
-
-      --link-color: var(--purple);
+    <style>
+      @font-face {
+        font-family: "BerkeleyMono";
+        src:
+          url("fonts/BerkeleyMono-Bold.woff2") format("woff2"),
+          url("fonts/BerkeleyMono-Bold.woff") format("woff");
+        font-weight: bold;
+        font-style: normal;
       }
-    }
 
-    body {
-      font-family: "BerkeleyMono", monospace !important;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: var(--background-primary);
-      color: var(--text-normal);
-      margin-bottom: 24px;
-      margin-left: 12px;
-      margin-right: 12px;
-    }
+      @font-face {
+        font-family: "BerkeleyMono";
+        src:
+          url("fonts/BerkeleyMono-Regular.woff2") format("woff2"),
+          url("fonts/BerkeleyMono-Regular.woff") format("woff");
+        font-weight: normal;
+        font-style: normal;
+      }
 
-    header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+      :root {
+        /* Colors from Flexoki: https://stephango.com/flexoki */
+        --text-normal: #100f0f;
+        --text-muted: #6f6e69;
+        --text-faint: #b7b5ac;
 
-    main {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+        --interface-normal: #e6e4d9;
+        --interface-hover: #dad8ce;
+        --interface-active: #cecdc3;
 
-    button {
-      font-family: inherit;
-      color: inherit;
-      background: none;
-      cursor: pointer;
-      border: none;
-    }
+        --background-primary: #fffcf0;
+        --background-secondary: #f2f0e5;
 
-    a {
-      color: var(--link-color);
-      text-decoration: none;
-    }
+        --red: #af3029;
+        --orange: #bc5215;
+        --yellow: #ad8301;
+        --green: #66800b;
+        --cyan: #24837b;
+        --blue: #205ea6;
+        --purple: #5e409d;
+        --magenta: #a02f6f;
 
-    a:hover {
-      font-weight: bold;
-    }
+        --link-color: var(--orange);
+      }
 
-    footer {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --text-normal: #cecdc3;
+          --text-muted: #878580;
+          --text-faint: #575653;
 
-    #container {
-      max-width: 1200px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+          --interface-normal: #282726;
+          --interface-hover: #343331;
+          --interface-active: #403e3c;
 
-    button {
-      font-size: 20px;
-      padding: 10px;
-      border: 4px solid var(--interface-normal);
-    }
+          --background-primary: #100f0f;
+          --background-secondary: #1c1b1a;
 
-    button:hover {
-      border-color: var(--interface-hover);
-    }
+          --red: #d14d41;
+          --orange: #da702c;
+          --yellow: #d0a215;
+          --green: #879a39;
+          --cyan: #3aa99f;
+          --blue: #4385be;
+          --purple: #8b7ec8;
+          --magenta: #ce5d97;
 
-    button:active {
-      border-color: var(--interface-active);
-    }
+          --link-color: var(--purple);
+        }
+      }
 
-    h2 {
-      font-size: 24px;
-    }
+      body {
+        font-family: "BerkeleyMono", monospace !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: var(--background-primary);
+        color: var(--text-normal);
+        margin-bottom: 24px;
+        margin-left: 12px;
+        margin-right: 12px;
+      }
 
-    h2 {
-      font-size: 36px;
-    }
+      header {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-    h3 {
-      font-size: 28px;
-    }
+      main {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
 
-    #uploadButton {
-      margin-top: 180px;
-      margin-bottom: 24px;
-      width: 320px;
-      height: 200px;
-      text-align: center;
-    }
+      button {
+        font-family: inherit;
+        color: inherit;
+        background: none;
+        cursor: pointer;
+        border: none;
+      }
 
-    #exampleButton {
-      border: none;
-      padding: 0px;
-      font-size: 16px;
-    }
+      a {
+        color: var(--link-color);
+        text-decoration: none;
+      }
 
-    #chartArea {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 600px;
-    }
+      a:hover {
+        font-weight: bold;
+      }
 
-    #exampleButton:hover {
-      text-decoration: underline;
-    }
+      footer {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
 
-    #whatsThis {
-      max-width: 600px;
-    }
+      #container {
+        max-width: 1200px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
 
-    #error {
-      max-width: 600px;
-      color: var(--red);
-    }
+      button {
+        font-size: 20px;
+        padding: 10px;
+        border: 4px solid var(--interface-normal);
+      }
 
-    #chartTitle {
-      justify-self: start;
-      display: none;
-    }
+      button:hover {
+        border-color: var(--interface-hover);
+      }
 
-    .sunburst-viz text {
-      font-family: "BerkeleyMono", monospace !important;
-    }
+      button:active {
+        border-color: var(--interface-active);
+      }
 
-    .sunburst-viz .text-contour {
-      stroke-width: 4 !important;
-    }
-  </style>
+      h2 {
+        font-size: 24px;
+      }
 
-  <script defer src="index.js"></script>
-</head>
+      h2 {
+        font-size: 36px;
+      }
 
-<body>
-  <div id="container">
-    <header>
-      <h1>JSON Space Analyzer</h1>
-      <button id="headerUploadButton">Upload a JSON file</button>
-    </header>
+      h3 {
+        font-size: 28px;
+      }
 
-    <main>
-      <div id="chartArea">
-        <button id="uploadButton">
-          Select or drop a JSON file here to analyze it.
-        </button>
+      #uploadButton {
+        margin-top: 180px;
+        margin-bottom: 24px;
+        width: 320px;
+        height: 200px;
+        text-align: center;
+      }
 
-        <button id="exampleButton">
-          or click here to load an example file
-        </button>
+      #exampleButton {
+        border: none;
+        padding: 0px;
+        font-size: 16px;
+      }
 
-        <h2 id="chartTitle"></h2>
+      #chartArea {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 600px;
+      }
 
-        <div id="chart"></div>
-        <div id="error"></div>
-      </div>
+      #exampleButton:hover {
+        text-decoration: underline;
+      }
 
-      <div id="whatsThis">
-        <h2>FAQ</h2>
+      #whatsThis {
+        max-width: 600px;
+      }
 
-        <h3>What is this?</h3>
+      #error {
+        max-width: 600px;
+        color: var(--red);
+      }
 
-        <p>
-          This is a tool that visualizes the size of the values in a JSON
-          document. It's meant for situations where you're dealing with JSON
-          data that's larger than you expected, and you want to know what's
-          taking up the space.
-        </p>
+      #chartTitle {
+        justify-self: start;
+        display: none;
+      }
 
-        <h3>Why aren't some parts of my JSON showing up?</h3>
+      .sunburst-viz text {
+        font-family: "BerkeleyMono", monospace !important;
+      }
 
-        <p>
-          The sunburst visualization is configured to only render slices with
-          angles greater than 0.05 degrees. If the values at a given depth in
-          your file span a great enough range, then the slices representing
-          the smallest keys will not be rendered.
-        </p>
+      .sunburst-viz .text-contour {
+        stroke-width: 4 !important;
+      }
+    </style>
 
-        <h3>Why is there so much empty space in the chart?</h3>
+    <script defer src="index.js"></script>
+  </head>
 
-        <p>
-          If you're seeing a lot of empty space, there are two likely causes:
+  <body>
+    <div id="container">
+      <header>
+        <h1>JSON Space Analyzer</h1>
+        <button id="headerUploadButton">Upload a JSON file</button>
+      </header>
 
-        <ol>
-          <li>
-            The sizes of the stringified values in your data span a wide
-            enough range that some slices are not being rendered. See the
-            previous question.
-          </li>
-          <li>The keys in your JSON take up a significant
-            percentage of the space in the file. The space taken up by the keys
-            is visualzed in the parent slice.
-          </li>
-        </ol>
-        </p>
+      <main>
+        <div id="chartArea">
+          <button id="uploadButton">
+            Select or drop a JSON file here to analyze it.
+          </button>
 
-        <h3>Who made this?</h3>
+          <button id="exampleButton">
+            or click here to load an example file
+          </button>
 
-        <p>
-          <a href="https://jamesbvaughan.com">James</a> did.
-          <br />
-          The font is Berkeley Mono by
-          <a href="https://berkeleygraphics.com/">Berkeley Graphics</a>.
-          <br />
-          The colors are from
-          <a href="https://stephango.com/flexoki">Flexoki</a> by
-          <a href="https://stephango.com/">Steph Ango</a>.
-          <br />
-          The sunburst visualization is from
-          <a href="https://github.com/vasturiano/sunburst-chart">Vasco Asturiano</a>
-          and was made with <a href="https://d3js.org/">D3</a>.
-        </p>
+          <h2 id="chartTitle"></h2>
 
-        <h3>Why did you make this?</h3>
+          <div id="chart"></div>
+          <div id="error"></div>
+        </div>
 
-        <p>
-          I was trying to figure out why some JSON files were so large at work.
-          I was able to answer some my of questions by inspecting the
-          files manually and by using
-          <a href="https://jqlang.github.io/jq/"><code>jq</code></a> but I
-          wanted a tool that would help me quickly visually identify the issue,
-          similar to tools like
-          <a href="https://apps.gnome.org/Baobab/">Disk Usage Analyzer</a>.
-        </p>
-        <p>
-          Inspired by single-purpose web tools like
-          <a href="https://www.speedscope.app/">speedscope</a>, I decided to
-          make something similar for visualizing JSON documents.
-        </p>
+        <div id="whatsThis">
+          <h2>FAQ</h2>
 
-        <h3>Can I see the source code?</h3>
+          <h3>What is this?</h3>
 
-        <p>
-          Yes. The source code is MIT licensed and available
-          <a href="https://github.com/jamesbvaughan/json-space-analyzer">here on GitHub</a>.
-        </p>
-      </div>
-    </main>
-  </div>
+          <p>
+            This is a tool that visualizes the size of the values in a JSON
+            document. It's meant for situations where you're dealing with JSON
+            data that's larger than you expected, and you want to know what's
+            taking up the space.
+          </p>
 
-  <input hidden type="file" id="jsonFileInput" accept=".json" />
-</body>
+          <h3>Why aren't some parts of my JSON showing up?</h3>
 
+          <p>
+            The sunburst visualization is configured to only render slices with
+            angles greater than 0.05 degrees. If the values at a given depth in
+            your file span a great enough range, then the slices representing
+            the smallest keys will not be rendered.
+          </p>
+
+          <h3>Why is there so much empty space in the chart?</h3>
+
+          <p>
+            If you're seeing a lot of empty space, there are two likely causes:
+          </p>
+
+          <ol>
+            <li>
+              The sizes of the stringified values in your data span a wide
+              enough range that some slices are not being rendered. See the
+              previous question.
+            </li>
+            <li>
+              The keys in your JSON take up a significant percentage of the
+              space in the file. The space taken up by the keys is visualzed in
+              the parent slice.
+            </li>
+          </ol>
+
+          <h3>Who made this?</h3>
+
+          <p>
+            <a href="https://jamesbvaughan.com">James</a> did.
+            <br />
+            The font is Berkeley Mono by
+            <a href="https://berkeleygraphics.com/">Berkeley Graphics</a>.
+            <br />
+            The colors are from
+            <a href="https://stephango.com/flexoki">Flexoki</a> by
+            <a href="https://stephango.com/">Steph Ango</a>.
+            <br />
+            The sunburst visualization is from
+            <a href="https://github.com/vasturiano/sunburst-chart"
+              >Vasco Asturiano</a
+            >
+            and was made with <a href="https://d3js.org/">D3</a>.
+          </p>
+
+          <h3>Why did you make this?</h3>
+
+          <p>
+            I was trying to figure out why some JSON files were so large at
+            work. I was able to answer some my of questions by inspecting the
+            files manually and by using
+            <a href="https://jqlang.github.io/jq/"><code>jq</code></a> but I
+            wanted a tool that would help me quickly visually identify the
+            issue, similar to tools like
+            <a href="https://apps.gnome.org/Baobab/">Disk Usage Analyzer</a>.
+          </p>
+          <p>
+            Inspired by single-purpose web tools like
+            <a href="https://www.speedscope.app/">speedscope</a>, I decided to
+            make something similar for visualizing JSON documents.
+          </p>
+
+          <h3>Can I see the source code?</h3>
+
+          <p>
+            Yes. The source code is MIT licensed and available
+            <a href="https://github.com/jamesbvaughan/json-space-analyzer"
+              >here on GitHub</a
+            >.
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <input hidden type="file" id="jsonFileInput" accept=".json" />
+  </body>
 </html>
