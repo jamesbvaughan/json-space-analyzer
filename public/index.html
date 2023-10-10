@@ -50,6 +50,8 @@
       --blue: #205ea6;
       --purple: #5e409d;
       --magenta: #a02f6f;
+
+      --link-color: var(--orange);
     }
 
     @media (prefers-color-scheme: dark) {
@@ -73,6 +75,8 @@
         --blue: #4385be;
         --purple: #8b7ec8;
         --magenta: #ce5d97;
+
+      --link-color: var(--purple);
       }
     }
 
@@ -111,8 +115,12 @@
     }
 
     a {
-      color: var(--purple);
+      color: var(--link-color);
       text-decoration: none;
+    }
+
+    a:hover {
+      font-weight: bold;
     }
 
     footer {
