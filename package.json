@@ -1,17 +1,14 @@
 {
   "name": "json-space-analyzer",
-  "module": "index.ts",
-  "type": "module",
   "scripts": {
     "dev": "concurrently -n server,bun \"lite-server --baseDir public\" \"bun run build --watch --sourcemap=external\"",
-    "build": "bun build src/index.ts --minify --outdir public"
+    "build": "bun build src/index.ts --minify --outdir public",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "bun-types": "latest",
     "concurrently": "^8.2.1",
-    "lite-server": "^2.6.1"
-  },
-  "peerDependencies": {
+    "lite-server": "^2.6.1",
+    "prettier": "^3.0.3",
     "typescript": "^5.0.0"
   },
   "dependencies": {
