@@ -2,10 +2,19 @@
   "name": "json-space-analyzer",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "concurrently -n server,bun \"lite-server --baseDir public\" \"bun run build --watch --sourcemap=external\"",
+    "build": "bun build src/index.ts --minify --outdir public"
+  },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "concurrently": "^8.2.1",
+    "lite-server": "^2.6.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "sunburst-chart": "^1.19.0"
   }
 }
