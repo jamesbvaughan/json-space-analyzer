@@ -1,133 +1,43 @@
-import Sunburst from "sunburst-chart";
+import { prepareData, renderChart } from "./chart";
 
-type SizeHeirarchyNode = {
-  name: string;
-  value: number;
-  children?: SizeHeirarchyNode[];
-};
-
+/**
+ * Get an element from the DOM, or throw an error if it doesn't exist.
+ */
 const $ = (selector: string) => {
   const element = document.querySelector(selector);
   if (!element) throw new Error(`Element not found: ${selector}`);
 
-  return element;
+  return element as HTMLElement;
 };
 
-const jsonFileInput = $("input#jsonFileInput") as HTMLInputElement;
-const chartElement = $("div#chart") as HTMLDivElement;
-const chartTitleElement = $("h2#chartTitle") as HTMLHeadingElement;
+const jsonFileInput = $("input#jsonFileInput");
+const chartElement = $("div#chart");
+const chartTitleElement = $("h2#chartTitle");
 const errorElement = $("#error");
 const headerUploadButton = $("button#headerUploadButton");
-const uploadButton = $("button#uploadButton") as HTMLButtonElement;
-const exampleButton = $("button#exampleButton") as HTMLButtonElement;
-
-/**
- * Returns the size of a string in bytes.
- *
- * This is used rather than `string.length` because the length of a string
- * does not necessarily equal the number of bytes it takes up in memory.
- */
-const byteSizeOfString = (str: string) => {
-  const encoder = new TextEncoder();
-  const encodedData = encoder.encode(str);
-  return encodedData.length;
-};
-
-const byteSizeOfObject = (object: object) =>
-  byteSizeOfString(JSON.stringify(object));
-
-/**
- * Compute a hash of a string for use in indexing into a list of colors.
- */
-const stringToHash = (str: string): number => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const charCode = str.charCodeAt(i);
-    hash = (hash << 5) - hash + charCode;
-    hash |= 0; // Convert to 32 bit integer
-  }
-  return hash;
-};
-
-const colors = [
-  "red",
-  "orange",
-  "yellow",
-  "green",
-  "cyan",
-  "blue",
-  "purple",
-  "magenta",
-];
-
-const getColorForName = (name: string) => {
-  const hash = stringToHash(name);
-  const index = Math.abs(hash) % colors.length;
-  return `var(--${colors[index]})`;
-};
-
-/**
- * Prepare an object for use with Sunburst by annotating every node with the
- * total size of its children.
- */
-const objectToHeirarchyList = (object: object): SizeHeirarchyNode[] =>
-  Object.entries(object).map(([name, value]) => ({
-    name,
-    value: byteSizeOfObject(value),
-    children:
-      typeof value === "object" && value !== null
-        ? objectToHeirarchyList(value)
-        : undefined,
-  }));
+const uploadButton = $("button#uploadButton");
+const exampleButton = $("button#exampleButton");
 
 const showError = (message: string) => {
+  console.error(message);
   chartElement.innerHTML = "";
   errorElement.innerHTML = `<h3>Error</h3><p>${message}</p>`;
 };
 
-const renderChart = (json: object) => {
-  let data: SizeHeirarchyNode;
-  try {
-    data = {
-      name: "root",
-      value: byteSizeOfObject(json),
-      children: objectToHeirarchyList(json),
-    };
-  } catch (error) {
-    showError(`Unable to analyze JSON data: ${(error as Error).message}`);
-    return;
-  }
+const handleFile = async (file?: File) => {
+  if (!file) return;
 
-  try {
-    const render = Sunburst()
-      .sort((a, b) => b.value - a.value)
-      .color((node) => getColorForName(node.name || ""))
-      .strokeColor("transparent")
-      .excludeRoot(true)
-      .transitionDuration(0)
-      .minSliceAngle(0.05)
-      .tooltipContent((x) => `Size (bytes): ${x.value}`)
-      .data(data);
-
-    chartElement.innerHTML = "";
-
-    render(chartElement);
-  } catch (error) {
-    showError(`Unable to render chart: ${(error as Error).message}`);
-  }
-};
-
-const resetUI = ({ filename }: { filename: string }) => {
   exampleButton.style.display = "none";
   uploadButton.style.display = "none";
   errorElement.innerHTML = "";
   chartElement.innerHTML = "Processing file...";
-  chartTitleElement.innerHTML = filename;
+  chartTitleElement.innerHTML = file.name;
   chartTitleElement.style.display = "block";
-};
 
-const handleFile = async (file: File) => {
-  resetUI({ filename: file.name });
+  if (file.type !== "application/json") {
+    showError("That's not a JSON file.");
+    return;
+  }
 
   const text = await file.text();
 
@@ -139,33 +49,25 @@ const handleFile = async (file: File) => {
     return;
   }
 
-  renderChart(json);
-};
+  let data;
+  try {
+    data = prepareData(json);
+  } catch (error) {
+    showError(`Unable to analyze JSON: ${(error as Error).message}`);
+    return;
+  }
 
-const handleExampleFile = async () => {
-  resetUI({ filename: "package.json" });
+  chartElement.innerHTML = "";
 
   try {
-    const response = await fetch(
-      "https://raw.githubusercontent.com/jamesbvaughan/json-space-analyzer/main/package.json",
-    );
-
-    if (!response.ok) {
-      throw new Error("Error fetching file.");
-    }
-
-    const json = await response.json();
-
-    renderChart(json);
+    renderChart(data, chartElement);
   } catch (error) {
-    showError(`Unable to load example file: ${(error as Error).message}`);
+    showError(`Unable to render chart: ${(error as Error).message}`);
   }
 };
 
 uploadButton.addEventListener("click", () => jsonFileInput.click());
 headerUploadButton.addEventListener("click", () => jsonFileInput.click());
-
-exampleButton.addEventListener("click", handleExampleFile);
 
 document.body.addEventListener("dragover", (event) => {
   event.preventDefault();
@@ -182,10 +84,35 @@ document.body.addEventListener("drop", (event) => {
   event.stopPropagation();
 
   const file = event.dataTransfer?.files?.[0];
-  if (file) handleFile(file);
+  handleFile(file);
 });
 
-jsonFileInput.addEventListener("change", async (event: Event) => {
+jsonFileInput.addEventListener("change", async (event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
-  if (file) handleFile(file);
+  handleFile(file);
+});
+
+const exampleFileUrl =
+  "https://raw.githubusercontent.com/jamesbvaughan/json-space-analyzer/main/package.json";
+
+const fetchExampleFile = async (): Promise<File> => {
+  const response = await fetch(exampleFileUrl);
+  if (!response.ok) throw new Error("Error fetching file.");
+
+  const json = await response.json();
+  const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
+
+  return new File([blob], "package.json", { type: blob.type });
+};
+
+exampleButton.addEventListener("click", async () => {
+  let file: File;
+  try {
+    file = await fetchExampleFile();
+  } catch (error) {
+    showError((error as Error).message);
+    return;
+  }
+
+  handleFile(file);
 });
