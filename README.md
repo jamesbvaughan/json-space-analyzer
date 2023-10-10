@@ -1,5 +1,7 @@
 # JSON Space Analyzer
 
+[![CI](https://github.com/jamesbvaughan/json-space-analyzer/actions/workflows/ci.yaml/badge.svg?branch=main&event=push)](https://github.com/jamesbvaughan/json-space-analyzer/actions/workflows/ci.yaml)
+
 ## Usage
 
 Go to https://json-space-analyzer.com and drop in a JSON file!
