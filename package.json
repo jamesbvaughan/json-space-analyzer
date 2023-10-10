@@ -3,7 +3,9 @@
   "scripts": {
     "dev": "bun x concurrently -n server,bun \" bun x lite-server --baseDir public\" \"bun run build --watch --sourcemap=external\"",
     "build": "bun build src/index.ts --minify --outdir public",
-    "format": "bun x prettier --write ."
+    "format": "bun x prettier --write .",
+    "lint": "bun x prettier --check .",
+    "typecheck": "bun x tsc"
   },
   "dependencies": {
     "sunburst-chart": "^1.19.0"
