@@ -134,7 +134,7 @@ const handleExampleFile = async () => {
 
   try {
     const response = await fetch(
-      "https://raw.githubusercontent.com/jamesbvaughan/tweenage.engineering/main/package.json"
+      "https://raw.githubusercontent.com/jamesbvaughan/json-space-analyzer/main/package.json"
     );
 
     if (!response.ok) {
