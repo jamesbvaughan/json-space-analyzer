@@ -34,18 +34,17 @@ const handleFile = async (file?: File) => {
   chartTitleElement.innerHTML = file.name;
   chartTitleElement.style.display = "block";
 
-  if (file.type !== "application/json") {
-    showError("That's not a JSON file.");
-    return;
-  }
-
   const text = await file.text();
 
   let json;
   try {
     json = JSON.parse(text);
   } catch (error) {
-    showError(`Unable to parse JSON file: ${(error as Error).message}`);
+    if (file.type !== "application/json") {
+      showError("That's not a JSON file.");
+    } else {
+      showError(`Unable to parse JSON file: ${(error as Error).message}`);
+    }
     return;
   }
 

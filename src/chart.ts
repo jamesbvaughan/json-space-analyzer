@@ -16,6 +16,26 @@ const byteSizeOfObject = (object: object) =>
   byteSizeOfString(JSON.stringify(object));
 
 /**
+ * Prepare an object for use with Sunburst by annotating every node with the
+ * total size of its children.
+ */
+const objectToHeirarchyList = (object: object): Node[] =>
+  Object.entries(object).map(([name, value]) => ({
+    name,
+    value: byteSizeOfObject(value),
+    children:
+      typeof value === "object" && value !== null
+        ? objectToHeirarchyList(value)
+        : undefined,
+  }));
+
+export const prepareData = (json: object) => ({
+  name: "root",
+  value: byteSizeOfObject(json),
+  children: objectToHeirarchyList(json),
+});
+
+/**
  * Compute a hash of a string for use in indexing into a list of colors.
  */
 const stringToHash = (str: string): number => {
@@ -39,41 +59,31 @@ const colors = [
   "magenta",
 ];
 
-const getColorForName = (name: string) => {
-  const hash = stringToHash(name);
+const generateColor = (node: Node) => {
+  const hash = stringToHash(node.name || "");
   const index = Math.abs(hash) % colors.length;
   return `var(--${colors[index]})`;
 };
 
-/**
- * Prepare an object for use with Sunburst by annotating every node with the
- * total size of its children.
- */
-const objectToHeirarchyList = (object: object): Node[] =>
-  Object.entries(object).map(([name, value]) => ({
-    name,
-    value: byteSizeOfObject(value),
-    children:
-      typeof value === "object" && value !== null
-        ? objectToHeirarchyList(value)
-        : undefined,
-  }));
+const generateTooltopContent = (node: Node) => {
+  let tooltopContent = `Size (bytes): ${node.value}`;
 
-export const prepareData = (json: object) => ({
-  name: "root",
-  value: byteSizeOfObject(json),
-  children: objectToHeirarchyList(json),
-});
+  if (node.children !== undefined) {
+    tooltopContent += `<br />Children: ${node.children.length}`;
+  }
+
+  return tooltopContent;
+};
 
 export const renderChart = (data: Node, element: HTMLElement) => {
   const render = Sunburst()
     .sort((a, b) => b.value - a.value)
-    .color((node) => getColorForName(node.name || ""))
+    .color(generateColor)
     .strokeColor("transparent")
     .excludeRoot(true)
     .transitionDuration(0)
     .minSliceAngle(0.05)
-    .tooltipContent((x) => `Size (bytes): ${x.value}`)
+    .tooltipContent(generateTooltopContent)
     .data(data);
 
   render(element);
