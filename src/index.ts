@@ -1,5 +1,3 @@
-/// <reference lib="dom" />
-
 import Sunburst from "sunburst-chart";
 
 const $ = (selector: string) => {
