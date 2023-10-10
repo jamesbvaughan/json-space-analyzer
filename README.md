@@ -1,4 +1,10 @@
-# json-space-analyzer
+# JSON Space Analyzer
+
+## Usage
+
+Go to https://json-space-analyzer.com and drop in a JSON file!
+
+## Development
 
 To install dependencies:
 
@@ -6,10 +12,14 @@ To install dependencies:
 bun install
 ```
 
-To run:
+To run in development mode:
 
 ```bash
-bun run index.ts
+bun run dev
 ```
 
-This project was created using `bun init` in bun v1.0.4. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+This will run a small web server and `bun build` in watch mode.
+
+## Contributing
+
+No special rules - just open a PR and I'll review it as soon as I'm able to.
