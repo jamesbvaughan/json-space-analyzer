@@ -1,5 +1,11 @@
 import Sunburst from "sunburst-chart";
 
+type SizeHeirarchyNode = {
+  name: string;
+  value: number;
+  children?: SizeHeirarchyNode[];
+};
+
 const $ = (selector: string) => {
   const element = document.querySelector(selector);
   if (!element) throw new Error(`Element not found: ${selector}`);
@@ -15,12 +21,12 @@ const headerUploadButton = $("button#headerUploadButton");
 const uploadButton = $("button#uploadButton") as HTMLButtonElement;
 const exampleButton = $("button#exampleButton") as HTMLButtonElement;
 
-type SizeHeirarchyNode = {
-  name: string;
-  value: number;
-  children?: SizeHeirarchyNode[];
-};
-
+/**
+ * Returns the size of a string in bytes.
+ *
+ * This is used rather than `string.length` because the length of a string
+ * does not necessarily equal the number of bytes it takes up in memory.
+ */
 const byteSizeOfString = (str: string) => {
   const encoder = new TextEncoder();
   const encodedData = encoder.encode(str);
@@ -30,25 +36,18 @@ const byteSizeOfString = (str: string) => {
 const byteSizeOfObject = (object: object) =>
   byteSizeOfString(JSON.stringify(object));
 
+/**
+ * Compute a hash of a string for use in indexing into a list of colors.
+ */
 const stringToHash = (str: string): number => {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const charCode = str.charCodeAt(i);
     hash = (hash << 5) - hash + charCode;
-    hash |= 0; // Convert to 32bit integer
+    hash |= 0; // Convert to 32 bit integer
   }
   return hash;
 };
-
-const objectToHeirarchyList = (object: object): SizeHeirarchyNode[] =>
-  Object.entries(object).map(([name, value]) => ({
-    name,
-    value: byteSizeOfObject(value),
-    children:
-      typeof value === "object" && value !== null
-        ? objectToHeirarchyList(value)
-        : undefined,
-  }));
 
 const colors = [
   "red",
@@ -60,6 +59,26 @@ const colors = [
   "purple",
   "magenta",
 ];
+
+const getColorForName = (name: string) => {
+  const hash = stringToHash(name);
+  const index = Math.abs(hash) % colors.length;
+  return `var(--${colors[index]})`;
+};
+
+/**
+ * Prepare an object for use with Sunburst by annotating every node with the
+ * total size of its children.
+ */
+const objectToHeirarchyList = (object: object): SizeHeirarchyNode[] =>
+  Object.entries(object).map(([name, value]) => ({
+    name,
+    value: byteSizeOfObject(value),
+    children:
+      typeof value === "object" && value !== null
+        ? objectToHeirarchyList(value)
+        : undefined,
+  }));
 
 const showError = (message: string) => {
   chartElement.innerHTML = "";
@@ -82,11 +101,7 @@ const renderChart = (json: object) => {
   try {
     const render = Sunburst()
       .sort((a, b) => b.value - a.value)
-      .color((node) => {
-        const hash = stringToHash(node.name || "");
-        const index = Math.abs(hash) % colors.length;
-        return `var(--${colors[index]})`;
-      })
+      .color((node) => getColorForName(node.name || ""))
       .strokeColor("transparent")
       .excludeRoot(true)
       .transitionDuration(0)
