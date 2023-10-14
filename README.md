@@ -8,7 +8,7 @@ expected, and you want to know what's taking up the space.
 
 ## Usage
 
-Go to https://json-space-analyzer.com and drop in a JSON file!
+Go to [json-space-analyzer.com](https://json-space-analyzer.com) and drop in a JSON file!
 
 ## Development
 
