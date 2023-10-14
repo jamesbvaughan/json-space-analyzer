@@ -22,7 +22,7 @@ const byteSizeOfEntry = (
   name: string,
   value: unknown,
   isParentArray: boolean,
-  addCommaSize: boolean
+  addCommaSize: boolean,
 ) => {
   const entrySize = isParentArray
     ? byteSizeOfObject(value)
