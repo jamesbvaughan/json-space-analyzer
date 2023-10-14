@@ -4,3 +4,8 @@ public/index.js
 public/index.js.map
 
 tsconfig.tsbuildinfo
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+.DS_Store

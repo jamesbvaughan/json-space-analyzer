@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  ci:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,3 +18,23 @@ jobs:
       - run: bun run typecheck
       - run: bun run lint
       - run: bun run build
+
+  playwright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+
+      - name: Install Playwright Browsers
+        run: bun x playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: bun x playwright test
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
