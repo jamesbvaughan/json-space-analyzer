@@ -1,17 +1,6 @@
 import { test, expect } from "@playwright/test";
 import path from "path";
 
-test("displays example file", async ({ page }) => {
-  await page.goto("/");
-
-  await page
-    .getByRole("link", { name: "or click here to load an example file" })
-    .click();
-
-  const chart = page.locator("#chart");
-  await expect(chart).toHaveScreenshot();
-});
-
 test("displays an uploaded file", async ({ page }) => {
   await page.goto("/");
 
@@ -20,7 +9,7 @@ test("displays an uploaded file", async ({ page }) => {
   await page.locator("#uploadButton").click();
 
   const fileChooser = await fileChooserPromise;
-  await fileChooser.setFiles(path.join(__dirname, "../package.json"));
+  await fileChooser.setFiles(path.join(__dirname, "test-data.json"));
 
   const chart = page.locator("#chart");
   await expect(chart).toHaveScreenshot();

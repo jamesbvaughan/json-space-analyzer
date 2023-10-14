@@ -1,0 +1,50 @@
+{
+  "root": {
+    "level1": {
+      "item1": "value1",
+      "item2": "value2",
+      "list1": [1, 2, 3],
+      "obj1": {
+        "subItem1": "subValue1",
+        "subItem2": "subValue2"
+      }
+    },
+    "level2": {
+      "item3": "value3",
+      "item4": "value4",
+      "list2": [4, 5, 6],
+      "obj2": {
+        "subItem3": "subValue3",
+        "subItem4": "subValue4"
+      }
+    },
+    "mixed": {
+      "item5": "value5",
+      "list3": [7, 8, 9],
+      "obj3": {
+        "subItem5": "subValue5",
+        "nested": {
+          "nestedItem1": "nestedValue1",
+          "nestedItem2": "nestedValue2"
+        }
+      }
+    },
+    "arrayOfObjects": [
+      {
+        "name": "Alice",
+        "age": 30
+      },
+      {
+        "name": "Bob",
+        "age": 40
+      },
+      {
+        "name": "Charlie",
+        "age": 50
+      }
+    ],
+    "numbers": [10, 20, 30, 40],
+    "strings": ["apple", "banana", "cherry"],
+    "booleans": [true, false, true]
+  }
+}
