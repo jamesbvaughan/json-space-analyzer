@@ -9,5 +9,8 @@
   },
   "dependencies": {
     "sunburst-chart": "^1.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.6"
   }
 }
