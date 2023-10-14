@@ -21,10 +21,18 @@ jobs:
 
   playwright:
     runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: playwright-browsers
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
       - run: bun install
+
+      - name: Cache playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: playwright-browsers
 
       - name: Install Playwright Browsers
         run: bun x playwright install --with-deps
