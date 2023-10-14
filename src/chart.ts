@@ -12,26 +12,51 @@ const byteSizeOfString = (str: string) => {
   return encodedData.length;
 };
 
-const byteSizeOfObject = (object: object) =>
+const byteSizeOfObject = (object: unknown) =>
   byteSizeOfString(JSON.stringify(object));
+
+/**
+ * Computes and returns the size in bytes that a member of a JSON object or
+ * array takes up on disk, including the key, commas, quotation marks, and
+ * colon.
+ */
+const byteSizeOfEntry = (
+  name: string,
+  value: unknown,
+  isParentArray: boolean,
+  addCommaSize: boolean,
+) => {
+  const entrySize = isParentArray
+    ? byteSizeOfObject(value)
+    : byteSizeOfString(`"${name}":${value}`);
+
+  return entrySize + (addCommaSize ? 1 : 0);
+};
 
 /**
  * Prepare an object for use with Sunburst by annotating every node with the
  * total size of its children.
  */
-const objectToHeirarchyList = (object: object): Node[] =>
-  Object.entries(object).map(([name, value]) => ({
-    name,
-    value: byteSizeOfObject(value),
-    children:
-      typeof value === "object" && value !== null
-        ? objectToHeirarchyList(value)
-        : undefined,
-  }));
+const objectToHeirarchyList = (object: object): Node[] => {
+  const entries = Object.entries(object);
+  const isArray = Array.isArray(object);
+
+  return entries.map(([name, entry], index) => {
+    let value: number | undefined = undefined;
+    let children: Node[] | undefined = undefined;
+
+    if (typeof entry === "object" && entry !== null) {
+      children = objectToHeirarchyList(entry);
+    } else {
+      value = byteSizeOfEntry(name, entry, isArray, index < entries.length - 1);
+    }
+
+    return { name, value, children };
+  });
+};
 
 export const prepareData = (json: object) => ({
   name: "root",
-  value: byteSizeOfObject(json),
   children: objectToHeirarchyList(json),
 });
 
@@ -65,14 +90,31 @@ const generateColor = (node: Node) => {
   return `var(--${colors[index]})`;
 };
 
-const generateTooltopContent = (node: Node) => {
-  let tooltopContent = `Size (bytes): ${node.value}`;
+const formatBytes = (bytes: number, decimals = 2): string => {
+  if (bytes === 0) return "0 Bytes";
 
-  if (node.children !== undefined) {
-    tooltopContent += `<br />Children: ${node.children.length}`;
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+};
+
+const generateTooltipContent = (node: Node): string => {
+  let tooltipRows = [];
+
+  if (node.__dataNode) {
+    const sizeString = formatBytes(node.__dataNode.value || 0);
+    tooltipRows.push(`Size: ${sizeString}`);
   }
 
-  return tooltopContent;
+  if (node.children !== undefined) {
+    tooltipRows.push(`Children: ${node.children.length}`);
+  }
+
+  return tooltipRows.join("<br/>");
 };
 
 export const renderChart = (data: Node, element: HTMLElement) => {
@@ -83,7 +125,7 @@ export const renderChart = (data: Node, element: HTMLElement) => {
     .excludeRoot(true)
     .transitionDuration(0)
     .minSliceAngle(0.05)
-    .tooltipContent(generateTooltopContent)
+    .tooltipContent(generateTooltipContent)
     .data(data);
 
   render(element);
