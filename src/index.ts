@@ -18,6 +18,7 @@ const errorElement = $("#error");
 const headerUploadButton = $("button#headerUploadButton");
 const uploadButton = $("button#uploadButton");
 const exampleButton = $("button#exampleButton");
+const dragOverlayElement = $("div#dragOverlay");
 
 const showError = (message: string) => {
   console.error(message);
@@ -34,6 +35,7 @@ const handleFile = async (file?: File) => {
   chartElement.innerHTML = "Processing file...";
   chartTitleElement.innerHTML = file.name;
   chartTitleElement.style.display = "block";
+  document.body.scrollIntoView();
 
   const text = await file.text();
 
@@ -75,16 +77,22 @@ headerUploadButton.addEventListener("click", () => jsonFileInput.click());
 document.body.addEventListener("dragover", (event) => {
   event.preventDefault();
   event.stopPropagation();
+
+  dragOverlayElement.classList.add("dragging");
 });
 
 document.body.addEventListener("dragleave", (event) => {
   event.preventDefault();
   event.stopPropagation();
+
+  dragOverlayElement.classList.remove("dragging");
 });
 
 document.body.addEventListener("drop", (event) => {
   event.preventDefault();
   event.stopPropagation();
+
+  dragOverlayElement.classList.remove("dragging");
 
   const file = event.dataTransfer?.files?.[0];
   handleFile(file);

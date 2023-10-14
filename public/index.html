@@ -210,6 +210,21 @@
       .sunburst-viz .text-contour {
         stroke-width: 4 !important;
       }
+
+      #dragOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+      }
+
+      .dragging {
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 0.3);
+        border: 4px dashed var(--purple);
+      }
     </style>
 
     <script defer src="index.js"></script>
@@ -334,6 +349,8 @@
         </div>
       </main>
     </div>
+
+    <div id="dragOverlay"></div>
 
     <input hidden type="file" id="jsonFileInput" accept=".json" />
   </body>
