@@ -29,3 +29,7 @@ This will run a small web server and `bun build` in watch mode.
 ## Contributing
 
 No special rules - just open a PR and I'll review it as soon as I'm able to.
+
+## Resources
+
+- [The JSON spec](https://www.json.org/json-en.html)
