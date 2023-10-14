@@ -1,1 +1,2 @@
-bun.lockb linguist-generated=true
+*.lockb linguist-generated=true
+*.lockb binary diff=lockb
