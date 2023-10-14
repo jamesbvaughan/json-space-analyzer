@@ -188,7 +188,7 @@
         text-align: center;
       }
 
-      #exampleButton {
+      #exampleLink {
         border: none;
         padding: 0px;
         font-size: 16px;
@@ -201,7 +201,7 @@
         align-items: center;
       }
 
-      #exampleButton:hover {
+      #exampleLink:hover {
         text-decoration: underline;
       }
 
@@ -259,9 +259,12 @@
             Select or drop a JSON file here to analyze it.
           </button>
 
-          <button id="exampleButton">
+          <a
+            id="exampleLink"
+            href="#file=https://raw.githubusercontent.com/jamesbvaughan/json-space-analyzer/main/package.json&name=This%20site's%20package.json"
+          >
             or click here to load an example file
-          </button>
+          </a>
 
           <h2 id="chartTitle"></h2>
 

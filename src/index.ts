@@ -17,7 +17,7 @@ const chartTitleElement = $("h2#chartTitle");
 const errorElement = $("#error");
 const headerUploadButton = $("button#headerUploadButton");
 const uploadButton = $("button#uploadButton");
-const exampleButton = $("button#exampleButton");
+const exampleLink = $("a#exampleLink");
 const dragOverlayElement = $("div#dragOverlay");
 
 const showError = (message: string) => {
@@ -29,7 +29,7 @@ const showError = (message: string) => {
 const handleFile = async (file?: File) => {
   if (!file) return;
 
-  exampleButton.style.display = "none";
+  exampleLink.style.display = "none";
   uploadButton.style.display = "none";
   errorElement.innerHTML = "";
   chartElement.innerHTML = "Processing file...";
@@ -99,31 +99,41 @@ document.body.addEventListener("drop", (event) => {
 });
 
 jsonFileInput.addEventListener("change", async (event) => {
+  window.location.hash = "";
   const file = (event.target as HTMLInputElement).files?.[0];
   handleFile(file);
 });
 
-const exampleFileUrl =
-  "https://raw.githubusercontent.com/jamesbvaughan/json-space-analyzer/main/package.json";
-
-const fetchExampleFile = async (): Promise<File> => {
-  const response = await fetch(exampleFileUrl);
+const fetchJSONFile = async (url: string, name: string): Promise<File> => {
+  const response = await fetch(url);
   if (!response.ok) throw new Error("Error fetching file.");
 
   const json = await response.json();
   const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
 
-  return new File([blob], "package.json", { type: blob.type });
+  return new File([blob], name, { type: blob.type });
 };
 
-exampleButton.addEventListener("click", async () => {
-  let file: File;
-  try {
-    file = await fetchExampleFile();
-  } catch (error) {
-    showError((error as Error).message);
-    return;
-  }
+const parseHashParameters = () => {
+  const hash = window.location.hash.substring(1); // remove the leading '#'
+  const urlSearchParams = new URLSearchParams(hash);
+  const params = Object.fromEntries(urlSearchParams.entries());
 
-  handleFile(file);
+  return params;
+};
+
+const handleFileInHashParameters = async () => {
+  const hashParameters = parseHashParameters();
+
+  if (hashParameters.file) {
+    const fileUrl = hashParameters.file;
+    const file = await fetchJSONFile(fileUrl, hashParameters.name ?? fileUrl);
+    handleFile(file);
+  }
+};
+
+window.addEventListener("hashchange", () => {
+  handleFileInHashParameters();
 });
+
+handleFileInHashParameters();
