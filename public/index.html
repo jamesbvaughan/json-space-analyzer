@@ -90,7 +90,7 @@
           --purple: #8b7ec8;
           --magenta: #ce5d97;
 
-          --link-color: var(--purple);
+          --link-color: var(--blue);
         }
       }
 
@@ -157,15 +157,22 @@
       button {
         font-size: 20px;
         padding: 10px;
+      }
+
+      .border {
         border: 4px solid var(--interface-normal);
       }
 
-      button:hover {
+      .border:hover {
         border-color: var(--interface-hover);
       }
 
-      button:active {
+      .border:active {
         border-color: var(--interface-active);
+      }
+
+      h1 a {
+        color: inherit;
       }
 
       h2 {
@@ -181,8 +188,6 @@
       }
 
       #uploadButton {
-        margin-top: 180px;
-        margin-bottom: 24px;
         width: 320px;
         height: 200px;
         text-align: center;
@@ -192,13 +197,24 @@
         border: none;
         padding: 0px;
         font-size: 16px;
-        margin-bottom: 180px;
       }
 
       #chartArea {
         display: flex;
         flex-direction: column;
         align-items: center;
+      }
+
+      #inputSection {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 180px;
+        padding-bottom: 180px;
+      }
+
+      #inputSection > * + * {
+        margin-top: 12px;
       }
 
       #exampleLink:hover {
@@ -217,6 +233,15 @@
       #chartTitle {
         justify-self: start;
         display: none;
+      }
+
+      input {
+        font-family: inherit;
+        width: 240px;
+        padding: 2px;
+        background: none;
+        color: inherit;
+        outline: none;
       }
 
       .sunburst-viz text {
@@ -249,22 +274,39 @@
   <body>
     <div id="container">
       <header>
-        <h1>JSON Space Analyzer</h1>
-        <button id="headerUploadButton">Upload a JSON file</button>
+        <h1>
+          <a href="/"> JSON Space Analyzer </a>
+        </h1>
+        <button id="headerUploadButton" class="border">
+          Upload a JSON file
+        </button>
       </header>
 
       <main>
         <div id="chartArea">
-          <button id="uploadButton">
-            Select or drop a JSON file here to analyze it.
-          </button>
+          <div id="inputSection">
+            <button id="uploadButton" class="border">
+              Select or drop a JSON file here to analyze it.
+            </button>
 
-          <a
-            id="exampleLink"
-            href="#file=https://raw.githubusercontent.com/jamesbvaughan/json-space-analyzer/main/package.json&name=This%20site's%20package.json"
-          >
-            or click here to load an example file
-          </a>
+            <form id="urlInputForm">
+              <label for="urlInput">
+                or paste a URL here
+                <input
+                  id="urlInput"
+                  class="border"
+                  placeholder="https://example.com/file.json"
+                />
+              </label>
+            </form>
+
+            <a
+              id="exampleLink"
+              href="#file=https://raw.githubusercontent.com/jamesbvaughan/json-space-analyzer/main/package.json&name=This%20site's%20package.json"
+            >
+              or click here to load an example file
+            </a>
+          </div>
 
           <h2 id="chartTitle"></h2>
 

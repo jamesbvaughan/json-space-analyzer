@@ -17,8 +17,10 @@ const chartTitleElement = $("h2#chartTitle");
 const errorElement = $("#error");
 const headerUploadButton = $("button#headerUploadButton");
 const uploadButton = $("button#uploadButton");
-const exampleLink = $("a#exampleLink");
 const dragOverlayElement = $("div#dragOverlay");
+const inputSectionElement = $("div#inputSection");
+const urlInputForm = $("form#urlInputForm");
+const urlInput = $("input#urlInput") as HTMLInputElement;
 
 const showError = (message: string) => {
   console.error(message);
@@ -26,14 +28,13 @@ const showError = (message: string) => {
   errorElement.innerHTML = `<h3>Error</h3><p>${message}</p>`;
 };
 
-const handleFile = async (file?: File) => {
+const handleFile = async (file?: File, name?: string) => {
   if (!file) return;
 
-  exampleLink.style.display = "none";
-  uploadButton.style.display = "none";
+  inputSectionElement.style.display = "none";
   errorElement.innerHTML = "";
   chartElement.innerHTML = "Processing file...";
-  chartTitleElement.innerHTML = file.name;
+  chartTitleElement.innerHTML = name || file.name;
   chartTitleElement.style.display = "block";
   document.body.scrollIntoView();
 
@@ -94,6 +95,7 @@ document.body.addEventListener("drop", (event) => {
 
   dragOverlayElement.classList.remove("dragging");
 
+  window.location.hash = "";
   const file = event.dataTransfer?.files?.[0];
   handleFile(file);
 });
@@ -102,6 +104,20 @@ jsonFileInput.addEventListener("change", async (event) => {
   window.location.hash = "";
   const file = (event.target as HTMLInputElement).files?.[0];
   handleFile(file);
+});
+
+urlInputForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const url = urlInput.value;
+
+  try {
+    new URL(url);
+  } catch (error) {
+    throw new Error(`Invalid URL: ${url}`);
+  }
+
+  window.location.hash = `file=${url}`;
 });
 
 const fetchJSONFile = async (url: string, name: string): Promise<File> => {
@@ -122,12 +138,15 @@ const parseHashParameters = () => {
   return params;
 };
 
+const getNameFromUrl = (url: string) => url.split("/").pop();
+
 const handleFileInHashParameters = async () => {
   const hashParameters = parseHashParameters();
 
-  if (hashParameters.file) {
-    const fileUrl = hashParameters.file;
-    const file = await fetchJSONFile(fileUrl, hashParameters.name ?? fileUrl);
+  const fileUrl = hashParameters.file;
+  if (fileUrl) {
+    const name = hashParameters.name ?? getNameFromUrl(fileUrl);
+    const file = await fetchJSONFile(fileUrl, name);
     handleFile(file);
   }
 };
