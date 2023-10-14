@@ -1,4 +1,5 @@
 import Sunburst, { Node } from "sunburst-chart";
+import globals from "./globals";
 
 /**
  * Returns the size of a string in bytes.
@@ -6,11 +7,8 @@ import Sunburst, { Node } from "sunburst-chart";
  * This is used rather than `string.length` because the length of a string
  * does not necessarily equal the number of bytes it takes up in memory.
  */
-const byteSizeOfString = (str: string) => {
-  const encoder = new TextEncoder();
-  const encodedData = encoder.encode(str);
-  return encodedData.length;
-};
+const byteSizeOfString = (str: string) =>
+  globals.isAscii ? str.length : new TextEncoder().encode(str).length;
 
 const byteSizeOfObject = (object: unknown) =>
   byteSizeOfString(JSON.stringify(object));
@@ -24,7 +22,7 @@ const byteSizeOfEntry = (
   name: string,
   value: unknown,
   isParentArray: boolean,
-  addCommaSize: boolean,
+  addCommaSize: boolean
 ) => {
   const entrySize = isParentArray
     ? byteSizeOfObject(value)

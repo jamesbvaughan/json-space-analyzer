@@ -1,4 +1,5 @@
 import { prepareData, renderChart } from "./chart";
+import globals from "./globals";
 
 /**
  * Get an element from the DOM, or throw an error if it doesn't exist.
@@ -35,6 +36,9 @@ const handleFile = async (file?: File) => {
   chartTitleElement.style.display = "block";
 
   const text = await file.text();
+
+  const encodedText = new TextEncoder().encode(text);
+  globals.isAscii = text.length === encodedText.byteLength;
 
   let json;
   try {
